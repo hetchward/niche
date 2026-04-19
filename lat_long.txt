@@ -1,0 +1,92 @@
+| Title                        | Category  |    Latitude |   Longitude |
+| ---------------------------- | --------- | ----------: | ----------: |
+| The Princess of Shoreditch   | roast     |  51.5256168 |  -0.0836019 |
+| The Crown Victoria Park      | roast     |   51.532074 |   -0.041748 |
+| The Exmoor Forest Inn        | roast     |   51.140701 |   -3.753887 |
+| The Princess of Wales        | roast     |   51.562050 |   -0.045717 |
+| The Scolt Head               | roast     |   51.542984 |   -0.081615 |
+| The White Cross Richmond     | roast     |   51.458999 |   -0.308389 |
+| The Hemmingway               | roast     |   51.537270 |   -0.049030 |
+| The Pig and Butcher          | roast     |   51.537600 |   -0.106690 |
+| The Albion                   | roast     |   51.539600 |   -0.109610 |
+| Lord Tredegar                | roast     |   51.528300 |   -0.033440 |
+| Faltering Fullback           | roast     |   51.570000 |   -0.109900 |
+| Victoire                     | croissant |  -33.8594262 |  151.1719554 |
+| Dawn Baked Goods             | croissant |  -33.8639823 |  151.1741937 |
+| My Friend the Baker          | croissant |  -33.8615000 |  151.1708000 |
+| Fabbrica Bread Shop          | croissant |  -33.8642564 |  151.1694914 |
+| Penny Fours                  | croissant |  -33.8580622 |  151.1833166 |
+| Butter Crumbs                | croissant |  -33.8735129 |  151.1272738 |
+| Home Croissanterie           | croissant |  -33.8572055 |  151.1803576 |
+| Queenstown Golf Course       | golf      |  -45.041430 |  168.666990 |
+| Gibraltar Golf Course        | golf      |  -34.467200 |  150.413000 |
+| Hurstville Golf Course       | golf      |  -33.972450 |  151.060900 |
+| North Turramurra Golf Course | golf      |  -33.707860 |  151.158830 |
+| Marrickville Golf Course     | golf      |  -33.917620 |  151.140030 |
+| Blackheath Golf Club         | golf      |  -33.6483327 |  150.2878599 |
+| Cootamundra Country Club     | golf      |  -34.6346015 |  148.0099371 |
+| Narooma Golf Club            | golf      |  -36.2279299 |  150.1357432 |
+| Hawks Nest Golf Club         | golf      |  -32.6692173 |  152.1817005 |
+| Gordon Golf Club             | golf      |  -33.7600115 |  151.1461315 |
+| Strathfield Golf Club        | golf      |  -33.8843629 |  151.0696534 |
+| Gosford Golf Club            | golf      |  -33.4180244 |  151.3401692 |
+| Kangaroo Valley Golf         | golf      |  -34.7396965 |  150.5116542 |
+| Asquith Golf Club            | golf      |  -33.6826776 |  151.1159283 |
+| Thredbo Golf Course          | golf      |  -36.5075261 |  148.2969846 |
+| Golf Club Montafon           | golf      |   47.0631540 |    9.9297370 |
+| Sedrun Golf Club             | golf      |   46.6574258 |    8.7174311 |
+| Bonville Golf Resort         | golf      |  -30.3623193 |  153.0261716 |
+| Hamilton Island Golf Club    | golf      |  -20.3579100 |  148.9359990 |
+| Gerringong Golf Course       | golf      |  -34.7634438 |  150.8225242 |
+| Mollymook Hilltop Golf       | golf      |  -35.3319580 |  150.4642179 |
+| Mt Broughton Golf            | golf      |  -34.5710855 |  150.3467014 |
+| Liverpool Golf Club          | golf      |  -33.9054111 |  150.9726309 |
+| Norfolk Island Golf Club     | golf      |  -29.0590768 |  167.9654131 |
+| Canterbury Golf International | golf      |  -33.9068916 |  151.1265747 |
+| Northbridge Golf Club        | golf      |  -33.8112877 |  151.2214230 |
+| Rosebud Country Club         | golf      |  -38.3827797 |  144.8982739 |
+| Gerringong Gerroa Golf Club  | golf      |  -34.7634438 |  150.8225242 |
+| Shelly Beach Golf Club       | golf      |  -33.3693745 |  151.4869165 |
+| Riverside Oaks Golf Resort   | golf      |  -33.5264704 |  150.9159561 |
+| Tasmania (watchlist)         | golf      |  -42.0000000 |  146.5000000 |
+
+## Source addresses (geocoding reference)
+
+| Venue | Address / notes |
+| ----- | --------------- |
+| Victoire | 660 Darling St, Rozelle NSW 2039 |
+| Dawn Baked Goods | Unit 14, 4–26 Mansfield St, Rozelle NSW 2039 |
+| My Friend the Baker | 719 Darling St, Rozelle NSW 2039 (interpolated along Darling St between 660 and 733) |
+| Fabbrica Bread Shop | 733 Darling St, Rozelle NSW 2039 |
+| Penny Fours | 485A Darling St, Balmain NSW 2041 |
+| Butter Crumbs | 189 Great North Rd, Five Dock NSW 2046 (Buttercrumbs Croissant) |
+| Home Croissanterie | Shop 1/418 Darling St, Balmain NSW 2041 |
+| Blackheath Golf Club | Brightlands Ave, Blackheath NSW 2785 |
+| Cootamundra Country Club | 94 Hurley St, Cootamundra NSW 2590 |
+| Narooma Golf Club | 1 Ballingalla St, Narooma NSW 2546 |
+| Hawks Nest Golf Club | 1 Sanderling Ave, Hawks Nest NSW 2324 |
+| Gordon Golf Club | 2 Lynn Ridge Ave, Gordon NSW 2072 |
+| Strathfield Golf Club | 84 Centenary Dr, Strathfield South NSW 2136 |
+| Gosford Golf Club | 22 Racecourse Rd, Gosford NSW |
+| Kangaroo Valley Golf | 391 Mt Scanzi Rd, Kangaroo Valley NSW 2577 |
+| Asquith Golf Club | Asquith / Hornsby area |
+| Thredbo Golf Course | Alpine Way, Thredbo NSW |
+| Golf Club Montafon | Zelfenstrasse 110, 6774 Tschagguns, Austria |
+| Sedrun Golf Club | Via Plaun Uaul, Tujetsch / Sedrun, Switzerland |
+| Bonville Golf Resort | North Bonville Rd, Bonville NSW 2450 |
+| Hamilton Island Golf Club | Dent Island, QLD (ferry from Hamilton Island) |
+| Gerringong / Gerroa | OSM lists one course: Gerringong Golf Club, Crooked River Rd, Gerroa NSW 2534 |
+| Mollymook Hilltop | Mollymook NSW |
+| Mt Broughton | Kater Rd, Sutton Forest NSW |
+| Liverpool Golf Club | Hollywood Dr, Lansvale NSW 2166 |
+| Norfolk Island Golf Club | Quality Row, Kingston, Norfolk Island |
+| Canterbury Golf | Near 20 Canterbury Rd, Hurlstone Park NSW 2193 |
+| Northbridge Golf Club | Sailors Bay Rd, Northbridge NSW 2063 |
+| Rosebud Country Club | Cleek Cres, Rosebud VIC |
+| Shelly Beach Golf Club | Shelly Beach Rd, Shelly Beach NSW 2261 |
+| Riverside Oaks | 74 O’Briens Rd, Cattai NSW 2756 |
+| Tasmania | Generic map pin for state-level wishlist |
+
+Coordinates from OpenStreetMap Nominatim (User-Agent: NicheLatLong) where possible; a few from published course / resort addresses. **Hawkes Best Golf club** was removed as a duplicate of Hawks Nest (see app seed).
+
+Croissant Index: Penny Fours, Home Croissanterie, and Butter Crumbs bases were re-checked on Darling St / Great North Rd (Nominatim, 2026-04). The app seed applies a small deterministic jitter per entry id on top of these bases (see `lib/croissant-seed-geo.ts`).
