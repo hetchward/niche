@@ -4,26 +4,18 @@ import { useRef } from "react";
 import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { optimizeImageFileToDataUrl } from "@/lib/image-optimize";
 import { cn } from "@/lib/utils";
 
 const MAX_PHOTOS = 12;
 const MAX_BYTES = 4 * 1024 * 1024;
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error ?? new Error("read failed"));
-    reader.readAsDataURL(file);
-  });
-}
 
 export function EntryPhotoPicker({
   photoUrls,
   onChange,
   id = "entry-photos",
   label = "Photos",
-  hint = "One or many — kept on this device. Very large libraries can hit browser storage limits.",
+  hint = "One or many — kept on this device. Large phone photos are automatically reduced to fit.",
   showLabel = true,
 }: {
   photoUrls: string[];
@@ -44,14 +36,19 @@ export function EntryPhotoPicker({
     const next = [...photoUrls];
     for (const file of files) {
       if (!file.type.startsWith("image/")) continue;
-      if (file.size > MAX_BYTES) {
-        window.alert(`${file.name} is too large (max 4MB per photo).`);
-        continue;
-      }
       try {
-        next.push(await readFileAsDataUrl(file));
+        const optimized = await optimizeImageFileToDataUrl(file, {
+          maxBytes: MAX_BYTES,
+        });
+        if (optimized.bytes > MAX_BYTES) {
+          window.alert(
+            `${file.name} is too large (max 4MB per photo), even after reducing size.`,
+          );
+          continue;
+        }
+        next.push(optimized.dataUrl);
       } catch {
-        window.alert(`Could not read ${file.name}.`);
+        window.alert(`Could not process ${file.name}.`);
       }
     }
     onChange(next);
