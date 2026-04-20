@@ -9,6 +9,11 @@ import { cn } from "@/lib/utils";
 
 const MAX_PHOTOS = 12;
 const MAX_BYTES = 4 * 1024 * 1024;
+const IMAGE_NAME_RE = /\.(avif|bmp|gif|heic|heif|jpe?g|png|tiff?|webp)$/i;
+
+function isImageFile(file: File): boolean {
+  return file.type.startsWith("image/") || IMAGE_NAME_RE.test(file.name);
+}
 
 export function EntryPhotoPicker({
   photoUrls,
@@ -35,7 +40,10 @@ export function EntryPhotoPicker({
     const files = Array.from(list).slice(0, room);
     const next = [...photoUrls];
     for (const file of files) {
-      if (!file.type.startsWith("image/")) continue;
+      if (!isImageFile(file)) {
+        window.alert(`${file.name} is not a supported image file.`);
+        continue;
+      }
       try {
         const optimized = await optimizeImageFileToDataUrl(file, {
           maxBytes: MAX_BYTES,
@@ -47,8 +55,9 @@ export function EntryPhotoPicker({
           continue;
         }
         next.push(optimized.dataUrl);
-      } catch {
-        window.alert(`Could not process ${file.name}.`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Could not process image.";
+        window.alert(message);
       }
     }
     onChange(next);

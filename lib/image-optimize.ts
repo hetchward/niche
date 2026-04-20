@@ -3,7 +3,7 @@ const MIN_DIMENSION = 320;
 const SCALE_STEP = 0.85;
 const QUALITY_STEPS = [0.86, 0.78, 0.7, 0.62, 0.54, 0.5];
 
-type OutputMimeType = "image/webp" | "image/jpeg";
+type OutputMimeType = "image/jpeg";
 
 export type OptimizeImageOptions = {
   maxBytes: number;
@@ -17,7 +17,12 @@ export type OptimizeImageResult = {
   optimized: boolean;
 };
 
-let preferredOutputMime: OutputMimeType | null = null;
+type DecodedImage = {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+  release?: () => void;
+};
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -37,18 +42,6 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-function getPreferredOutputMime(): OutputMimeType {
-  if (preferredOutputMime) return preferredOutputMime;
-  const probe = document.createElement("canvas");
-  probe.width = 1;
-  probe.height = 1;
-  const maybeWebp = probe.toDataURL("image/webp");
-  preferredOutputMime = maybeWebp.startsWith("data:image/webp")
-    ? "image/webp"
-    : "image/jpeg";
-  return preferredOutputMime;
-}
-
 function scaleToMaxDimension(width: number, height: number, maxDimension: number) {
   const longest = Math.max(width, height);
   if (longest <= maxDimension) return { width, height };
@@ -59,7 +52,7 @@ function scaleToMaxDimension(width: number, height: number, maxDimension: number
   };
 }
 
-function loadImage(file: File): Promise<HTMLImageElement> {
+function loadImageElement(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const image = new Image();
@@ -73,6 +66,28 @@ function loadImage(file: File): Promise<HTMLImageElement> {
     };
     image.src = url;
   });
+}
+
+async function loadDecodedImage(file: File): Promise<DecodedImage> {
+  try {
+    const image = await loadImageElement(file);
+    return {
+      source: image,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+    };
+  } catch {
+    if (typeof createImageBitmap !== "function") {
+      throw new Error(`Could not decode ${file.name}`);
+    }
+    const bitmap = await createImageBitmap(file);
+    return {
+      source: bitmap,
+      width: bitmap.width,
+      height: bitmap.height,
+      release: () => bitmap.close(),
+    };
+  }
 }
 
 function canvasToBlob(
@@ -125,7 +140,7 @@ export async function optimizeImageFileToDataUrl(
   file: File,
   options: OptimizeImageOptions,
 ): Promise<OptimizeImageResult> {
-  if (shouldSkipOptimization(file)) {
+  const readOriginal = async (): Promise<OptimizeImageResult> => {
     const dataUrl = await readFileAsDataUrl(file);
     return {
       dataUrl,
@@ -133,63 +148,73 @@ export async function optimizeImageFileToDataUrl(
       mimeType: file.type || "application/octet-stream",
       optimized: false,
     };
+  };
+
+  if (shouldSkipOptimization(file)) {
+    return readOriginal();
   }
 
   const maxDimension = options.maxDimension ?? DEFAULT_MAX_DIMENSION;
-  const source = await loadImage(file);
-  const initialSize = scaleToMaxDimension(source.naturalWidth, source.naturalHeight, maxDimension);
-  const outputMime = getPreferredOutputMime();
-
-  if (
-    file.size <= options.maxBytes &&
-    source.naturalWidth === initialSize.width &&
-    source.naturalHeight === initialSize.height &&
-    (file.type === outputMime || file.type === "image/jpeg")
-  ) {
-    const dataUrl = await readFileAsDataUrl(file);
-    return {
-      dataUrl,
-      bytes: file.size,
-      mimeType: file.type,
-      optimized: false,
-    };
+  let decoded: DecodedImage;
+  try {
+    decoded = await loadDecodedImage(file);
+  } catch {
+    if (file.size <= options.maxBytes) {
+      return readOriginal();
+    }
+    throw new Error(`Could not compress ${file.name} enough to fit 4MB.`);
   }
+  try {
+    const initialSize = scaleToMaxDimension(decoded.width, decoded.height, maxDimension);
+    const outputMime: OutputMimeType = "image/jpeg";
 
-  let width = initialSize.width;
-  let height = initialSize.height;
-  let bestBlob: Blob | null = null;
-
-  while (true) {
-    for (const quality of QUALITY_STEPS) {
-      const blob = await renderCompressedBlob(source, width, height, outputMime, quality);
-      if (!bestBlob || blob.size < bestBlob.size) {
-        bestBlob = blob;
-      }
-      if (blob.size <= options.maxBytes) {
-        const dataUrl = await blobToDataUrl(blob);
-        return {
-          dataUrl,
-          bytes: blob.size,
-          mimeType: blob.type,
-          optimized: true,
-        };
-      }
+    if (
+      file.size <= options.maxBytes &&
+      decoded.width === initialSize.width &&
+      decoded.height === initialSize.height &&
+      file.type === "image/jpeg"
+    ) {
+      return readOriginal();
     }
 
-    if (Math.max(width, height) <= MIN_DIMENSION) break;
-    width = Math.max(MIN_DIMENSION, Math.round(width * SCALE_STEP));
-    height = Math.max(MIN_DIMENSION, Math.round(height * SCALE_STEP));
-  }
+    let width = initialSize.width;
+    let height = initialSize.height;
+    let bestBlob: Blob | null = null;
 
-  const fallback = bestBlob;
-  if (!fallback) {
-    throw new Error(`Could not optimize ${file.name}`);
+    while (true) {
+      for (const quality of QUALITY_STEPS) {
+        const blob = await renderCompressedBlob(decoded.source, width, height, outputMime, quality);
+        if (!bestBlob || blob.size < bestBlob.size) {
+          bestBlob = blob;
+        }
+        if (blob.size <= options.maxBytes) {
+          const dataUrl = await blobToDataUrl(blob);
+          return {
+            dataUrl,
+            bytes: blob.size,
+            mimeType: blob.type,
+            optimized: true,
+          };
+        }
+      }
+
+      if (Math.max(width, height) <= MIN_DIMENSION) break;
+      width = Math.max(MIN_DIMENSION, Math.round(width * SCALE_STEP));
+      height = Math.max(MIN_DIMENSION, Math.round(height * SCALE_STEP));
+    }
+
+    const fallback = bestBlob;
+    if (!fallback) {
+      throw new Error(`Could not optimize ${file.name}`);
+    }
+    const dataUrl = await blobToDataUrl(fallback);
+    return {
+      dataUrl,
+      bytes: fallback.size,
+      mimeType: fallback.type || outputMime,
+      optimized: true,
+    };
+  } finally {
+    decoded.release?.();
   }
-  const dataUrl = await blobToDataUrl(fallback);
-  return {
-    dataUrl,
-    bytes: fallback.size,
-    mimeType: fallback.type || outputMime,
-    optimized: true,
-  };
 }
