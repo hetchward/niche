@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isShare = pathname.startsWith("/share");
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "dev";
 
   return (
     <div className="flex min-h-dvh flex-col bg-[var(--niche-cream)] text-foreground">
@@ -21,9 +22,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             Run your own rankings in Niche
           </Link>
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">
+            Version {appVersion}
+          </p>
         </div>
       ) : (
-        <MobileNav />
+        <MobileNav versionLabel={appVersion} />
       )}
     </div>
   );
