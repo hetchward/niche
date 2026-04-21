@@ -29,6 +29,9 @@ function openStreetMapUrl(lat: number, lng: number) {
   return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
 }
 
+const fieldFill =
+  "border-0 bg-muted/45 shadow-none ring-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-0";
+
 export function EntryLocationEditor({
   locationName: locationNameProp,
   latitude: latProp,
@@ -143,7 +146,7 @@ export function EntryLocationEditor({
           value={locationName}
           onChange={(e) => setLocationName(e.target.value)}
           onBlur={flushLocationName}
-          className="rounded-2xl"
+          className={`h-11 rounded-2xl px-3 ${fieldFill}`}
           placeholder="Rozelle, Sydney"
         />
         <p className="text-xs text-muted-foreground">
@@ -158,7 +161,7 @@ export function EntryLocationEditor({
             id="loc-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="rounded-2xl sm:flex-1"
+            className={`h-11 rounded-2xl px-3 sm:flex-1 ${fieldFill}`}
             placeholder="660 Darling St Rozelle, or club name…"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -184,7 +187,7 @@ export function EntryLocationEditor({
         </p>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         {hits.length > 0 ? (
-          <ul className="max-h-48 space-y-1 overflow-y-auto rounded-2xl border border-border/70 bg-muted/20 p-2 text-sm">
+          <ul className="max-h-48 space-y-1 overflow-y-auto rounded-2xl bg-muted/25 p-2 text-sm">
             {hits.map((h, i) => (
               <li key={`${h.lat}-${h.lon}-${i}`}>
                 <button
@@ -213,7 +216,7 @@ export function EntryLocationEditor({
           <Input
             id="loc-lat"
             inputMode="decimal"
-            className="rounded-2xl font-mono text-sm"
+            className={`h-11 rounded-2xl px-3 font-mono text-sm ${fieldFill}`}
             value={latText}
             onChange={(e) => setLatText(e.target.value)}
             onBlur={flushCoordsFromInputs}
@@ -225,7 +228,7 @@ export function EntryLocationEditor({
           <Input
             id="loc-lng"
             inputMode="decimal"
-            className="rounded-2xl font-mono text-sm"
+            className={`h-11 rounded-2xl px-3 font-mono text-sm ${fieldFill}`}
             value={lngText}
             onChange={(e) => setLngText(e.target.value)}
             onBlur={flushCoordsFromInputs}

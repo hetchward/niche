@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/", label: "Home", emoji: "🏠" },
   { href: "/map", label: "Map", emoji: "🗺️" },
-  { href: "/entries/new", label: "Add", emoji: "➕" },
-  { href: "/categories/new", label: "Niche", emoji: "🧷" },
+  { href: "/entries/new", label: "Add", emoji: "💾" },
+  { href: "/categories/new", label: "Niche", emoji: "🦄" },
 ] as const;
 
 export function MobileNav({ versionLabel }: { versionLabel?: string }) {

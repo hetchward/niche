@@ -137,7 +137,7 @@ export function EntryRowThumb({
         src={url}
         alt=""
         className={cn(
-          "size-12 shrink-0 rounded-xl object-cover ring-1 ring-border/70",
+          "size-12 shrink-0 rounded-xl object-cover bg-muted/20",
           className,
         )}
       />
@@ -146,7 +146,7 @@ export function EntryRowThumb({
   return (
     <div
       className={cn(
-        "flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted/50 text-xs text-muted-foreground ring-1 ring-border/40",
+        "flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted/55 text-xs text-muted-foreground",
         className,
       )}
       aria-hidden

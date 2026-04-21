@@ -29,11 +29,23 @@ const LABELS: EntryLabel[] = [
   "Needs Re-test",
 ];
 
+const SCORE_STEP = 0.05;
+
+/** Filled fields, no default border — separation comes from grey fills, not outlines. */
+const fieldFill =
+  "border-0 bg-muted/45 shadow-none ring-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-0";
+
 function newId(prefix: string) {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `${prefix}-${crypto.randomUUID()}`;
   }
   return `${prefix}-${Date.now()}`;
+}
+
+function normalizeScore(rawValue: number, maxScore: number) {
+  if (!Number.isFinite(rawValue)) return 0;
+  const clamped = Math.min(Math.max(rawValue, 0), maxScore);
+  return Number((Math.round(clamped / SCORE_STEP) * SCORE_STEP).toFixed(2));
 }
 
 export function EntryNewClient() {
@@ -61,18 +73,37 @@ export function EntryNewClient() {
     [category],
   );
 
-  const [scores, setScores] = useState<Record<string, string>>({});
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const [scoreNotes, setScoreNotes] = useState<Record<string, string>>({});
+  /** Per-criterion note field hidden until user taps Add note. */
+  const [scoreNoteOpen, setScoreNoteOpen] = useState<Record<string, boolean>>({});
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
 
+  const adjustScore = (criterionId: string, maxScore: number, delta: number) => {
+    setScores((prev) => {
+      const current = prev[criterionId] ?? 0;
+      const next = normalizeScore(current + delta, maxScore);
+      return {
+        ...prev,
+        [criterionId]: next,
+      };
+    });
+  };
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!category || !title.trim()) return;
-    const scoreRows: EntryScore[] = criteria.map((c) => ({
-      criterionId: c.id,
-      score: Number(scores[c.id] ?? 0) || 0,
-    }));
+    const scoreRows: EntryScore[] = criteria.map((c) => {
+      const score = normalizeScore(scores[c.id] ?? 0, c.maxScore);
+      const trimmedNote = (scoreNotes[c.id] ?? "").trim();
+      return {
+        criterionId: c.id,
+        score,
+        ...(trimmedNote ? { note: trimmedNote } : {}),
+      };
+    });
     const bonus = Number(bonusPoints) || 0;
     const draft: Entry = {
       id: newId("ent"),
@@ -113,17 +144,17 @@ export function EntryNewClient() {
         </p>
       </header>
 
-      <Card className="rounded-3xl border-border/70">
+      <Card className="rounded-3xl border-0 bg-card shadow-sm ring-0">
         <CardHeader>
           <CardTitle className="text-base">Review</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+          <form className="flex flex-col gap-5" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label>Category</Label>
               <select
                 required
-                className="h-11 w-full rounded-2xl border border-input bg-background px-3 text-sm"
+                className={`h-11 w-full appearance-none rounded-2xl px-3 text-sm ${fieldFill}`}
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
               >
@@ -145,7 +176,7 @@ export function EntryNewClient() {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="rounded-2xl"
+                className={`h-11 rounded-2xl px-3 ${fieldFill}`}
                 placeholder="The Hemmingway"
               />
             </div>
@@ -157,11 +188,11 @@ export function EntryNewClient() {
                 type="date"
                 value={reviewedAt}
                 onChange={(e) => setReviewedAt(e.target.value)}
-                className="rounded-2xl"
+                className={`h-11 rounded-2xl px-3 ${fieldFill}`}
               />
             </div>
 
-            <div className="rounded-2xl border border-border/70 bg-muted/10 p-4">
+            <div className="rounded-2xl bg-muted/30 p-4">
               <p className="mb-3 text-sm font-medium">Map pin (optional)</p>
               <EntryLocationEditor
                 locationName={locationName}
@@ -181,29 +212,107 @@ export function EntryNewClient() {
             </div>
 
             {criteria.length ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <p className="text-sm font-medium">Scores</p>
-                <div className="grid grid-cols-1 gap-3">
-                  {criteria.map((c) => (
-                    <div key={c.id} className="flex items-center gap-3">
-                      <Label className="w-40 shrink-0 text-xs">
-                        {c.emoji ? `${c.emoji} ` : null}
-                        {c.name}
-                      </Label>
-                      <Input
-                        inputMode="decimal"
-                        className="rounded-2xl"
-                        value={scores[c.id] ?? ""}
-                        placeholder={`0–${c.maxScore}`}
-                        onChange={(e) =>
-                          setScores((prev) => ({
-                            ...prev,
-                            [c.id]: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 gap-2">
+                  {criteria.map((c) => {
+                    const noteOpen = scoreNoteOpen[c.id] ?? false;
+                    return (
+                      <div key={c.id} className="rounded-2xl bg-muted/30 px-3 py-2.5">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <Label className="min-w-0 flex-1 truncate text-xs">
+                            {c.emoji ? `${c.emoji} ` : null}
+                            {c.name}
+                          </Label>
+                          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                            {(scores[c.id] ?? 0).toFixed(2)}/{c.maxScore}
+                          </span>
+                          {!noteOpen ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 shrink-0 px-2 text-xs"
+                              onClick={() =>
+                                setScoreNoteOpen((prev) => ({ ...prev, [c.id]: true }))
+                              }
+                            >
+                              Add note
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 shrink-0 px-2 text-xs text-muted-foreground"
+                              onClick={() => {
+                                setScoreNotes((prev) => {
+                                  const next = { ...prev };
+                                  delete next[c.id];
+                                  return next;
+                                });
+                                setScoreNoteOpen((prev) => {
+                                  const next = { ...prev };
+                                  delete next[c.id];
+                                  return next;
+                                });
+                              }}
+                            >
+                              Remove note
+                            </Button>
+                          )}
+                        </div>
+                        <div className="mt-2 flex min-w-0 items-center gap-2">
+                          <button
+                            type="button"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted/55 text-sm text-foreground transition hover:bg-muted/75"
+                            onClick={() => adjustScore(c.id, c.maxScore, -SCORE_STEP)}
+                            aria-label={`Decrease score for ${c.name}`}
+                          >
+                            -
+                          </button>
+                          <input
+                            type="range"
+                            min={0}
+                            max={c.maxScore}
+                            step={SCORE_STEP}
+                            value={scores[c.id] ?? 0}
+                            onChange={(e) => {
+                              const next = normalizeScore(Number(e.target.value), c.maxScore);
+                              setScores((prev) => ({
+                                ...prev,
+                                [c.id]: next,
+                              }));
+                            }}
+                            className="h-2 min-w-0 flex-1 cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
+                            aria-label={`Score slider for ${c.name}`}
+                          />
+                          <button
+                            type="button"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted/55 text-sm text-foreground transition hover:bg-muted/75"
+                            onClick={() => adjustScore(c.id, c.maxScore, SCORE_STEP)}
+                            aria-label={`Increase score for ${c.name}`}
+                          >
+                            +
+                          </button>
+                        </div>
+                        {noteOpen ? (
+                          <Textarea
+                            className={`mt-2 min-h-[56px] rounded-2xl px-3 py-2 text-sm ${fieldFill}`}
+                            value={scoreNotes[c.id] ?? ""}
+                            onChange={(e) =>
+                              setScoreNotes((prev) => ({
+                                ...prev,
+                                [c.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="Optional note for this score…"
+                            autoFocus
+                          />
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : null}
@@ -213,7 +322,7 @@ export function EntryNewClient() {
               <Input
                 id="bonus"
                 inputMode="decimal"
-                className="rounded-2xl"
+                className={`h-11 rounded-2xl px-3 ${fieldFill}`}
                 value={bonusPoints}
                 onChange={(e) => setBonusPoints(e.target.value)}
               />
@@ -222,7 +331,7 @@ export function EntryNewClient() {
             <div className="space-y-2">
               <Label>Label</Label>
               <select
-                className="h-11 w-full rounded-2xl border border-input bg-background px-3 text-sm"
+                className={`h-11 w-full appearance-none rounded-2xl px-3 text-sm ${fieldFill}`}
                 value={label}
                 onChange={(e) => setLabel((e.target.value as EntryLabel) || "")}
               >
@@ -239,7 +348,7 @@ export function EntryNewClient() {
               <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
-                className="min-h-[120px] rounded-2xl"
+                className={`min-h-[120px] rounded-2xl px-3 py-2 ${fieldFill}`}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Crackling didn’t crackle…"
